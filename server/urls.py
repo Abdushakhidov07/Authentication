@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from TaskManager.views import page_not_found_404
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('TaskManager.urls'))
 ]
+
+
+
+handler404 = 'TaskManager.views.page_not_found_404'

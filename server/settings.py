@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-r)@5h_t0mvgc_#y1r)%@wz3z7^cy^^eq8j*&fcf78u#e=h&-fo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_numeric_filter',      # <-- Обязательно добавьте эту строку
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,7 +80,7 @@ DATABASES = {
         'NAME': 'task_user_db',
         'PORT':5432,
         'HOST':'localhost',
-        'PASSWORD':'',
+        'PASSWORD':'rengoky11',
         'USER': 'postgres'
     }
 }
@@ -124,6 +125,7 @@ STATICFILES_DIR = [BASE_DIR/'static']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

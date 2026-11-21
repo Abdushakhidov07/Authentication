@@ -7,12 +7,18 @@
 </head>
 <body>
     <h1>My tasks</h1>   
+    <form method="GET">
+        <input type="text" name="qeury" placeholder="Search..." value="{{data}}">
+        <button type="submit">Search</button>
+    </form>
     {% for  task in tasks %}
     <div>
        <h1>Title: {{task.title}}</h1> 
        <h1>Caption: {{task.caption}}</h1> 
+       <button><a href="/show_task_id/{{task.id}}">Show more</a></button>
     </div>
     {% endfor %}
+    <button><a href="/show_task">Show task</a></button>
     <button><a href="/create_task">Create task</a></button>
     <button><a href="/logout">Logout</a></button>
 </body>

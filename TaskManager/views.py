@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from .models import *
+from django.db.models import Q
+from django.http import Http404, HttpResponse
 
 
 
@@ -14,9 +16,12 @@ def registration(request):
                 username = data['username'],
                 password = data['password'],    
             )
+            user = authenticate(request, username = data['username'], password = data['password'])
+            if user is not None:
+                login(request, user)
+                return redirect("profile")
         else:
             return redirect("registration")
-        return redirect("login")
     return render(request, 'registration.html')
     
             
@@ -60,5 +65,47 @@ def create_task(request):
 
 @login_required
 def show_task(request):
+    data = request.GET.get('qeury')
     tasks = Task.objects.filter(user_id = request.user)
-    return render(request, 'show_task.html', {"tasks":tasks})
+    if data:
+        tasks = tasks.filter(Q(title__icontains=data) | Q(caption__icontains=data))
+
+    
+    return render(request, 'show_task.html', {"tasks":tasks, "data":data})
+
+
+
+
+@login_required
+def show_task_by_id(request, pk):
+    tasks = Task.objects.get(pk=pk, user_id = request.user)
+    if tasks is None:
+        raise Http404()
+    return render(request, 'show_task_by_id.html', {"tasks":tasks})
+
+
+
+
+def page_not_found_404(request, exption):
+    return render(request, "error.html", status=404)
+    
+
+
+@login_required
+def change_status(request, pk):
+    task = Task.objects.get(Q(pk=pk) & Q(user_id = request.user))
+    if request.method == 'POST':
+        data = request.POST.get('status')
+        if data not in Task.CHOICES_STATUS:
+            return HttpResponse("<h1>ERROR STATUS</h1> ")
+        task.status=data
+        task.save()
+        return redirect("show_task_by_id", pk=pk)
+        
+    return render(request, "choice_status.html", {"status": Task.CHOICES_STATUS, "task":task})
+       
+        
+        
+        
+    
+    
