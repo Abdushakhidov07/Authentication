@@ -17,6 +17,14 @@ class Task(models.Model):
     status =  models.CharField(max_length=100, choices=CHOICES_STATUS, default="proccessing")
     created_at = models.TimeField(default=datetime.now())
     
+    class Meta:
+        permissions = [
+            ('can_publish', "User can Publish task"),
+            ('can_change', "User can change task"),
+            ('can_delete', "User can delete task"),
+            ('can_view', "User can view task")
+        ]
+    
     def __str__(self):
         return self.title
 

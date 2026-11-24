@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -17,6 +17,9 @@ def registration(request):
                 password = data['password'],    
             )
             user = authenticate(request, username = data['username'], password = data['password'])
+            group = Group.objects.get(name = 'Simple')
+            user.groups.add(group)
+            
             if user is not None:
                 login(request, user)
                 return redirect("profile")
@@ -52,23 +55,29 @@ def profile(request):
 
 @login_required
 def create_task(request):
-    if request.method == 'POST':
-        data = request.POST
-        Task.objects.create(
-                title = data['title'],
-                caption = data['caption'],
-                user_id = request.user
-            )
-        return redirect("my_task")
+    if request.user.groups.filter(name='Editors').exists():
+        if request.method == 'POST':
+            data = request.POST
+            Task.objects.create(
+                    title = data['title'],
+                    caption = data['caption'],
+                    user_id = request.user
+                )
+            return redirect("my_task")
+    else:
+        return redirect('profile')
     return render(request, 'create_task.html')
     
 
 @login_required
 def show_task(request):
-    data = request.GET.get('qeury')
-    tasks = Task.objects.filter(user_id = request.user)
-    if data:
-        tasks = tasks.filter(Q(title__icontains=data) | Q(caption__icontains=data))
+    if request.user.groups.filter(name='Editors').exists():
+        data = request.GET.get('qeury')
+        tasks = Task.objects.filter(user_id = request.user)
+        if data:
+            tasks = tasks.filter(Q(title__icontains=data) | Q(caption__icontains=data))
+    else:
+        return redirect("profile")
 
     
     return render(request, 'show_task.html', {"tasks":tasks, "data":data})
@@ -101,6 +110,7 @@ def change_status(request, pk):
         task.status=data
         task.save()
         return redirect("show_task_by_id", pk=pk)
+
         
     return render(request, "choice_status.html", {"status": Task.CHOICES_STATUS, "task":task})
        
